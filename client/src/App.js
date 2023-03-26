@@ -33,21 +33,23 @@ function App() {
     };
   }, [chat]);
 
-  const userjoin = (name) => {
-    socketRef.current.emit('user_join', name);
+  const userjoin = (name, room) => {
+    socketRef.current.emit("user_join", { name, room });
+    setState({ ...state, name, room });
   };
 
   const onMessageSubmit = (e) => {
-    let msgEle = document.getElementById('message');
-    console.log([msgEle.name], msgEle.value);
-    setState({...state, [msgEle.name]: msgEle.value});
-    socketRef.current.emit('message', {
-      name: state.name,
-      message: msgEle.value
-    });
     e.preventDefault();
-    setState({message: '', name: state.name});
-    msgEle.value = '';
+    let msgEle = document.getElementById("message");
+    console.log([msgEle.name], msgEle.value);
+    setState({ ...state, [msgEle.name]: msgEle.value });
+    socketRef.current.emit("message", {
+      name: state.name,
+      message: msgEle.value,
+      room: state.room,
+    });
+    setState({ message: "", name: state.name });
+    msgEle.value = "";
     msgEle.focus();
   };
 
@@ -86,29 +88,36 @@ function App() {
       )}
 
       {!state.name && (
-        <form
-          className='form'
-          onSubmit={(e) => {
-            console.log(document.getElementById('username_input').value);
-            e.preventDefault();
-            setState({name: document.getElementById('username_input').value});
-            userjoin(document.getElementById('username_input').value);
-            // userName.value = '';
-          }}
-        >
-          <div className='form-group'>
-            <label>
-              User Name:
-              <br />
-              <input id='username_input' />
-            </label>
-          </div>
-          <br />
+          <form
+              className="form"
+              onSubmit={(e) => {
+                let nameEle = document.getElementById("username_input");
+                let roomEle = document.getElementById("room_input");
+                console.log(nameEle.value);
+                e.preventDefault();
+                userjoin(nameEle.value, roomEle.value);
+              }}
+          >
+            <div className="form-group">
+              <label>
+                User Name:
+                <br />
+                <input id="username_input" />
+              </label>
+            </div>
+            <div className="form-group">
+              <label>
+                Room:
+                <br />
+                <input id="room_input" />
+              </label>
+            </div>
+            <br />
 
-          <br />
-          <br />
-          <button type='submit'> Click to join</button>
-        </form>
+            <br />
+            <br />
+            <button type="submit">Click to join</button>
+          </form>
       )}
     </div>
   );
